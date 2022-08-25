@@ -1,0 +1,6 @@
+project: chainsaw
+target: chainsaw
+
+cmds:
+  - cmd: /chainsaw hunt /rules -- /fuzz.evtx
+    filepath: /fuzz.evtx
