@@ -1,20 +1,18 @@
-# Build Stage
-FROM ghcr.io/evanrichter/cargo-fuzz:latest as builder
+FROM rustlang/rust:nightly as builder
 
-## evtx samples
+RUN apt-get update && apt-get install -y wget unzip
+
 RUN wget https://github.com/omerbenamram/evtx/archive/refs/heads/master.zip && \
     unzip master.zip && \
     mkdir /testsuite && \
-    cp evtx-master/samples/* /testsuite/
+    (cp -r evtx-master/samples/. /testsuite/ 2>/dev/null || echo "No samples to copy")
 
-## Add source code to the build stage.
 ADD . /src
 WORKDIR /src
 
-RUN env RUSTFLAGS="-g -Cdebug-assertions=on" cargo +nightly -Z sparse-registry build --release && \
+RUN env RUSTFLAGS="-g -Cdebug-assertions=on" cargo +nightly build --release && \
     mv target/release/chainsaw /chainsaw
 
-# Package Stage
 FROM rustlang/rust:nightly
 
 COPY --from=builder /chainsaw /
